@@ -84,9 +84,18 @@ export default {
           localStorage.setItem("username", this.username);
 
           this.$router.push({ name: "movie" });
-        } catch (error) {
+        } catch ({
+          response: {
+            status,
+            data: { non_field_errors: nonFieldErrors },
+          },
+        }) {
+          if (status === 400 && nonFieldErrors) {
+            this.text = nonFieldErrors[0];
+          } else {
+            this.text = "Something went wrong.";
+          }
           this.snackbar = true;
-          this.text = "Login failed.";
         }
       } else {
         this.snackbar = true;
