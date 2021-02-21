@@ -43,6 +43,14 @@
               </v-card-actions>
             </v-card>
           </v-col>
+          <v-col cols="12">
+            <v-pagination
+              v-if="pages > 1"
+              v-model="page"
+              class="my-4"
+              :length="pages"
+            ></v-pagination>
+          </v-col>
         </v-row>
       </v-col>
     </v-row>
@@ -58,21 +66,42 @@ export default {
     authToken: "",
     username: "",
 
-    title: "",
-
-    items: [],
-    pages: 1,
-
-    page: 1,
-
     alert: false,
     text: "",
+
+    title: "",
+    items: [],
+    count: 0,
+    page: 1,
+
+    resultsPerPage: 10,
   }),
+  computed: {
+    offset() {
+      return this.resultsPerPage * (this.page - 1);
+    },
+    pages() {
+      return (
+        Math.floor(this.count / this.resultsPerPage) +
+        (this.count % this.resultsPerPage > 0 ? 1 : 0)
+      );
+    },
+  },
   watch: {
     async title(val) {
+      this.page = 1;
       const movieUri = `/movie/?s=${val}&page=${this.page}`;
       this.fetchMovies(movieUri);
     },
+    page(val) {
+      let movieUri;
+      if (this.title.length) {
+        movieUri = `/movie/?s=${this.title}&page=${val}`;
+      } else {
+        movieUri = `/movie/?offset=${this.offset}`;
+      }
+      this.fetchMovies(movieUri);
+  },
   },
   mounted() {
     this.authToken = localStorage.getItem("authToken");
@@ -87,8 +116,6 @@ export default {
   },
   methods: {
     async fetchMovies(movieUri) {
-      this.page = 1;
-
       const host = "http://127.0.0.1:8000";
 
       try {
@@ -115,7 +142,7 @@ export default {
             poster,
           })
         );
-        this.pages = Math.floor(count / 10) + (count % 10 > 0 ? 1 : 0);
+        this.count = count;
       } catch ({
         response: {
           status,
@@ -126,7 +153,7 @@ export default {
           this.text = "Too many results.";
           this.alert = true;
           this.items = [];
-          this.pages = 1;
+          this.count = 0;
         } else {
           console.error(error);
         }
