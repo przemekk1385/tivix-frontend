@@ -41,6 +41,7 @@
 
 <script>
 import axios from "axios";
+import apiHost from "@/config";
 
 export default {
   name: "Login",
@@ -65,13 +66,12 @@ export default {
   },
   methods: {
     async login() {
-      const host = "http://127.0.0.1:8000";
-      const tokenUri = "/auth/token/login";
+      const tokenUri = "auth/token/login";
 
       if (this.valid || this.$refs.loginForm.validate()) {
         try {
           const authTokenPromise = await axios.post(
-            `${host}${tokenUri}`,
+            `${apiHost}${tokenUri}`,
             JSON.stringify({
               username: this.username,
               password: this.password,

@@ -61,6 +61,7 @@
 
 <script>
 import axios from "axios";
+import apiHost from "@/config";
 
 export default {
   name: "Movie",
@@ -92,15 +93,15 @@ export default {
   watch: {
     async title(val) {
       this.page = 1;
-      const movieUri = `/movie/?s=${val}&page=${this.page}`;
+      const movieUri = `movie/?s=${val}&page=${this.page}`;
       this.fetchMovies(movieUri);
     },
     page(val) {
       let movieUri;
       if (this.title.length) {
-        movieUri = `/movie/?s=${this.title}&page=${val}`;
+        movieUri = `movie/?s=${this.title}&page=${val}`;
       } else {
-        movieUri = `/movie/?offset=${this.offset}`;
+        movieUri = `movie/?offset=${this.offset}`;
       }
       this.fetchMovies(movieUri);
     },
@@ -112,16 +113,14 @@ export default {
     if (!this.authToken || !this.username) {
       this.$router.push({ name: "login" });
     } else {
-      const movieUri = "/movie/";
+      const movieUri = "movie/";
       this.fetchMovies(movieUri);
     }
   },
   methods: {
     async fetchMovies(movieUri) {
-      const host = "http://127.0.0.1:8000";
-
       try {
-        const movieListPromise = await axios.get(`${host}${movieUri}`, {
+        const movieListPromise = await axios.get(`${apiHost}${movieUri}`, {
           headers: { Authorization: `Token ${this.authToken}` },
         });
 
@@ -168,8 +167,6 @@ export default {
       }
     },
     async toggleFavourite(i) {
-      const host = "http://127.0.0.1:8000";
-
       const {
         id,
         title,
@@ -182,14 +179,14 @@ export default {
 
       try {
         if (favourite) {
-          const movieUri = `/movie/${id}/`;
-          await axios.delete(`${host}${movieUri}`, {
+          const movieUri = `movie/${id}/`;
+          await axios.delete(`${apiHost}${movieUri}`, {
             headers: { Authorization: `Token ${this.authToken}` },
           });
         } else {
-          const movieUri = "/movie/";
+          const movieUri = "movie/";
           await axios.post(
-            `${host}${movieUri}`,
+            `${apiHost}${movieUri}`,
             { title, year, imdb_id, movie_type, poster },
             {
               headers: { Authorization: `Token ${this.authToken}` },
