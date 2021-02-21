@@ -109,10 +109,10 @@ export default {
 
     if (!this.authToken || !this.username) {
       this.$router.push({ name: "login" });
-    }
-
+    } else {
     const movieUri = "/movie/";
     this.fetchMovies(movieUri);
+    }
   },
   methods: {
     async fetchMovies(movieUri) {
