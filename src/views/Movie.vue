@@ -10,7 +10,7 @@
           >
           </v-text-field>
         </v-form>
-        <v-alert v-model="alert" dense type="warning">
+        <v-alert ref="alert" v-model="alert" dense type="warning">
           {{ text }}
         </v-alert>
         <v-row>
@@ -33,8 +33,10 @@
               <v-card-actions>
                 <v-spacer></v-spacer>
 
-                <v-btn icon>
-                  <v-icon>mdi-star</v-icon>
+                <v-btn icon @click="toggleFavourite(i)">
+                  <v-icon :color="item.favourite ? 'pink' : ''"
+                    >mdi-star</v-icon
+                  >
                 </v-btn>
 
                 <v-btn :href="`https://www.imdb.com/title/${item.imdbId}`" icon>
@@ -101,7 +103,7 @@ export default {
         movieUri = `/movie/?offset=${this.offset}`;
       }
       this.fetchMovies(movieUri);
-  },
+    },
   },
   mounted() {
     this.authToken = localStorage.getItem("authToken");
@@ -110,8 +112,8 @@ export default {
     if (!this.authToken || !this.username) {
       this.$router.push({ name: "login" });
     } else {
-    const movieUri = "/movie/";
-    this.fetchMovies(movieUri);
+      const movieUri = "/movie/";
+      this.fetchMovies(movieUri);
     }
   },
   methods: {
@@ -127,6 +129,7 @@ export default {
 
         this.text = "";
         this.alert = false;
+
         this.items = results.map(
           ({
             title,
@@ -134,14 +137,19 @@ export default {
             imdb_id: imdbId,
             movie_type: movieType,
             poster,
+            id,
+            favourite,
           }) => ({
             title,
             year,
             imdbId,
             movieType,
             poster,
+            id,
+            favourite,
           })
         );
+
         this.count = count;
       } catch ({
         response: {
@@ -156,6 +164,47 @@ export default {
           this.count = 0;
         } else {
           console.error(error);
+        }
+      }
+    },
+    async toggleFavourite(i) {
+      const host = "http://127.0.0.1:8000";
+
+      const {
+        id,
+        title,
+        year,
+        imdbId: imdb_id,
+        movieType: movie_type,
+        poster,
+        favourite,
+      } = this.items[i];
+
+      try {
+        if (favourite) {
+          const movieUri = `/movie/${id}/`;
+          await axios.delete(`${host}${movieUri}`, {
+            headers: { Authorization: `Token ${this.authToken}` },
+          });
+        } else {
+          const movieUri = "/movie/";
+          await axios.post(
+            `${host}${movieUri}`,
+            { title, year, imdb_id, movie_type, poster },
+            {
+              headers: { Authorization: `Token ${this.authToken}` },
+            }
+          );
+        }
+
+        this.items[i].favourite = !favourite;
+      } catch ({ response: { data, status } }) {
+        if (status === 400) {
+          this.text = "Something went wrong.";
+          this.alert = true;
+          this.$vuetify.goTo(this.$refs.alert);
+        } else {
+          console.error(data);
         }
       }
     },
