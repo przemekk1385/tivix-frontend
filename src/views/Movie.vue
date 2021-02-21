@@ -150,7 +150,7 @@ export default {
         },
       }) {
         if (status === 400) {
-          this.text = "Too many results.";
+          this.text = error.split(":")[1]?.trim() || "Something went wrong.";
           this.alert = true;
           this.items = [];
           this.count = 0;
