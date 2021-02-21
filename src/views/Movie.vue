@@ -10,6 +10,9 @@
           >
           </v-text-field>
         </v-form>
+        <v-alert v-model="alert" dense type="warning">
+          {{ text }}
+        </v-alert>
         <v-row>
           <v-col
             v-for="(item, i) in items"
@@ -61,6 +64,9 @@ export default {
     pages: 1,
 
     page: 1,
+
+    alert: false,
+    text: "",
   }),
   watch: {
     async title(val) {
@@ -76,6 +82,8 @@ export default {
 
         const { count, results } = movieListPromise?.data;
 
+        this.text = "";
+        this.alert = false;
         this.items = results.map(
           ({
             title,
@@ -98,7 +106,14 @@ export default {
           data: { error },
         },
       }) {
-        console.log(status, error);
+        if (status === 400) {
+          this.text = "Too many results.";
+          this.alert = true;
+          this.items = [];
+          this.pages = 1;
+        } else {
+          console.error(error);
+        }
       }
     },
   },
