@@ -74,10 +74,24 @@ export default {
           headers: { Authorization: `Token ${this.authToken}` },
         });
 
-        const { items, pages } = movieListPromise?.data;
+        const { count, results } = movieListPromise?.data;
 
-        this.items = items;
-        this.pages = pages;
+        this.items = results.map(
+          ({
+            title,
+            year,
+            imdb_id: imdbId,
+            movie_type: movieType,
+            poster,
+          }) => ({
+            title,
+            year,
+            imdbId,
+            movieType,
+            poster,
+          })
+        );
+        this.pages = Math.floor(count / 10) + (count % 10 > 0 ? 1 : 0);
       } catch ({
         response: {
           status,
