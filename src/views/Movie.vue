@@ -34,10 +34,7 @@
                   <v-icon>mdi-star</v-icon>
                 </v-btn>
 
-                <v-btn
-                  :href="`https://www.imdb.com/title/${item.imdb_id}`"
-                  icon
-                >
+                <v-btn :href="`https://www.imdb.com/title/${item.imdbId}`" icon>
                   <v-icon>mdi-link</v-icon>
                 </v-btn>
               </v-card-actions>
