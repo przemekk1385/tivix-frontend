@@ -70,10 +70,26 @@ export default {
   }),
   watch: {
     async title(val) {
+      const movieUri = `/movie/?s=${val}&page=${this.page}`;
+      this.fetchMovies(movieUri);
+    },
+  },
+  mounted() {
+    this.authToken = localStorage.getItem("authToken");
+    this.username = localStorage.getItem("username");
+
+    if (!this.authToken || !this.username) {
+      this.$router.push({ name: "login" });
+    }
+
+    const movieUri = "/movie/";
+    this.fetchMovies(movieUri);
+  },
+  methods: {
+    async fetchMovies(movieUri) {
       this.page = 1;
 
       const host = "http://127.0.0.1:8000";
-      const movieUri = `/movie/?s=${val}&page=${this.page}`;
 
       try {
         const movieListPromise = await axios.get(`${host}${movieUri}`, {
@@ -116,14 +132,6 @@ export default {
         }
       }
     },
-  },
-  mounted() {
-    this.authToken = localStorage.getItem("authToken");
-    this.username = localStorage.getItem("username");
-
-    if (!this.authToken || !this.username) {
-      this.$router.push({ name: "login" });
-    }
   },
 };
 </script>
